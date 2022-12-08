@@ -12,3 +12,4 @@ output "cloudtrail_arn" {
   value       = join("", aws_cloudtrail.default.*.arn)
   description = "The Amazon Resource Name of the trail"
 }
+

@@ -27,3 +27,6 @@ output "cloudtrail_bucket_arn" {
   value       = module.cloudtrail_s3_bucket.bucket_arn
   description = "ARN of the CloudTral S3 bucket"
 }
+
+
+

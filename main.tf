@@ -21,11 +21,30 @@ resource "aws_cloudtrail" "default" {
     }
   }
 
+  # dynamic "advanced_event_selector" {
+  #   for_each = var.advanced_event_selector
+  #   content {
+  #     name = lookup(advanced_event_selector.value, "name", "placeholder")
+  #     dynamic "field_selector" {
+  #       for_each = lookup(advanced_event_selector.value, "field_selector", [])
+  #       content {
+  #         field           = field_selector.value.field
+  #         equals          = field_selector.value.equals
+  #         # ends_with       = lookup(field_selector.value, "ends_with", [])==[]? []: field_selector.value.ends_with
+  #         # not_ends_with   = field_selector.value.not_ends_with
+  #         # not_equals      = field_selector.value.not_equals
+  #         # not_starts_with = field_selector.value.not_starts_with
+  #         # starts_with     = field_selector.value.starts_with
+  #       }
+  #     }
+  #   }
+  # }
+
   dynamic "event_selector" {
     for_each = var.event_selector
     content {
-      include_management_events = lookup(event_selector.value, "include_management_events", null)
-      read_write_type           = lookup(event_selector.value, "read_write_type", null)
+      include_management_events = lookup(event_selector.value, "include_management_events", null )
+      read_write_type           = lookup(event_selector.value, "read_write_type", null )
 
       dynamic "data_resource" {
         for_each = lookup(event_selector.value, "data_resource", [])
@@ -36,4 +55,13 @@ resource "aws_cloudtrail" "default" {
       }
     }
   }
+
 }
+
+
+
+
+
+
+
+

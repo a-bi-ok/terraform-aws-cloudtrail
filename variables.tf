@@ -48,11 +48,19 @@ variable "insight_selector" {
   default     = []
 }
 
+variable "example" {
+type = list(object({
+  a = string
+  b = bool
+  d = list(list(string))
+}))
+default = [{a="xy", b=true, d=[["q","r","s"],[1,2,3]]}]
+}
+
 variable "event_selector" {
   type = list(object({
     include_management_events = bool
     read_write_type           = string
-
     data_resource = list(object({
       type   = string
       values = list(string)
@@ -60,8 +68,87 @@ variable "event_selector" {
   }))
 
   description = "Specifies an event selector for enabling data event logging. See: https://www.terraform.io/docs/providers/aws/r/cloudtrail.html for details on this variable"
-  default     = []
+  default     = [
+  {
+    include_management_events = true,
+    read_write_type = "All",
+    data_resource = [
+      {
+        type = "AWS::Lambda::Function",
+        values = ["arn:aws:lambda"]
+      },
+      {
+        type = "AWS::Lambda::Function",
+        values = ["arn:aws:lambda:us-east-1:550416381825:function:mock-api-lambda-function"]
+      },
+      {
+        type = "AWS::S3::Object",
+        values = ["arn:aws:s3"]
+      },
+      {
+        type = "AWS::S3::Object",
+        values = ["arn:aws:s3:::mock-api-550416381825-lambda/"]
+      },
+      {
+        type = "AWS::DynamoDB::Table",
+        values = ["arn:aws:dynamodb"]
+      },
+      {
+        type = "AWS::DynamoDB::Table",
+        values = ["arn:aws:dynamodb:us-east-1:550416381825:table/mock-spur-database"]
+      }
+    ]
+  }
+]
 }
+
+variable "advanced_event_selector" {
+  type = list(object({
+    name = string
+    field_selector    = list(object({
+      field           = string
+      equals          = list(string)
+      # ends_with       = list(string)
+      # not_ends_with   = list(string)
+      # not_equals      = list(string)
+      # not_starts_with = list(string)
+      # starts_with     = list(string)
+    }))
+  }))
+
+  description = "Specifies an advanced event selector for enabling data event logging. See: https://www.terraform.io/docs/providers/aws/r/cloudtrail.html for details on this variable"
+  default     =  [
+  {
+    name = "Log Delete* events for one S3 bucket",
+    field_selector = [
+      {
+        field = "eventCategory",
+        equals = ["Data"],
+      },
+      {
+        field = "eventName",
+        equals = [ 
+          "PutObject",
+          "DeleteObject"
+          ],
+      },
+      {
+        field = "resources.ARN",
+        equals = ["arn:aws:s3:::mock-api-550416381825-lambda/"],
+      },
+      {
+        field = "readOnly",
+        equals = ["false"],
+      },
+      {
+        field = "resources.type",
+        equals = ["AWS::S3::Object"],
+      },
+    ]
+  },
+]  
+}
+
 
 variable "kms_key_arn" {
   type        = string
